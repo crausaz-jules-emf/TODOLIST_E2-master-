@@ -1,0 +1,62 @@
+name: CD - Build & Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ACR_LOGIN_SERVER: m324demoacrqba.azurecr.io
+  IMAGE_NAME: task-manager-app
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # -------------------
+      # Checkout code
+      # -------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # -------------------
+      # Compute image tag
+      # -------------------
+      - name: Compute image tag
+        id: tag
+        run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      # -------------------
+      # Login to ACR
+      # -------------------
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v2
+        with:
+          login-server: ${{ env.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # -------------------
+      # Build Docker image
+      # -------------------
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }} .
+
+      # -------------------
+      # Push Docker image (versioned)
+      # -------------------
+      - name: Push Docker image (SHA)
+        run: |
+          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }}
+
+      # -------------------
+      # Push Docker image (latest)
+      # -------------------
+      - name: Tag and push latest
+        run: |
+          docker tag ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }} \
+                     ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
+
+          docker push ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
