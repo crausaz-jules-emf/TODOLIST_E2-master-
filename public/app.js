@@ -67,7 +67,7 @@ function renderTasks() {
   for (const task of tasks) {
     const fragment = taskTemplate.content.cloneNode(true);
     const card = fragment.querySelector(".task-card");
-    const checkbox = fragment.querySelector('input[type="checkbox"]');
+    const checkbox = fragment.querySelector("input[type=\"checkbox\"]");
     const title = fragment.querySelector("h3");
     const description = fragment.querySelector(".task-card__description");
     const status = fragment.querySelector(".task-card__status");

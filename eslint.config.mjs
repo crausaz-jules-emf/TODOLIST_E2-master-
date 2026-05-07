@@ -16,7 +16,7 @@ export default defineConfig([
   },
 
   {
-    files: ["client/**/*.js"],
+    files: ["public/**/*.js"],
     languageOptions: {
       sourceType: "module", // Utilise import/export
       globals: {
@@ -33,14 +33,13 @@ export default defineConfig([
       "no-unused-vars": "warn",
       "no-console": "warn",
       "semi": ["error", "always"],
-      "quotes": ["error", "double"],
-      "indent": ["error", 2]
+      "quotes": ["error", "double"]
     },
   },
 
 
   {
-    files: ["backend/**/*.js"],
+    files: ["./**/*.js"],
     languageOptions: {
       sourceType: "commonjs", // Utilise require/module.exports
       globals: {
@@ -56,8 +55,7 @@ export default defineConfig([
       "no-unused-vars": "warn",
       "no-console": "warn",
       "semi": ["error", "always"],
-      "quotes": ["error", "double"],
-      "indent": ["error", 4]
+      "quotes": ["error", "double"]
     },
   },
 ]);
