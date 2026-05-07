@@ -16,7 +16,7 @@ spec:
         - name: acr-pull
       containers:
         - name: todolistjules
-          image: m324demoacrqba.azurecr.io/todolistjules:4ec7a11
+          image: m324demoacrqba.azurecr.io/todolistjules:636c1ec
           ports:
             - containerPort: 3000
 ---
