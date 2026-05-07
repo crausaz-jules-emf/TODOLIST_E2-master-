@@ -7,7 +7,7 @@ on:
 
 env:
   ACR_LOGIN_SERVER: m324demoacrqba.azurecr.io
-  IMAGE_NAME: todolist
+  IMAGE_NAME: todolistjules
 
 jobs:
   build-docker:
@@ -61,3 +61,9 @@ jobs:
                      ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
 
           docker push ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Update Backend image tag in Kubernetes manifest
+        run: |
+          FILE="k8s/backend.yml"
+          sed -i "s|image: ${{ env.ACR_LOGIN_SERVER }}/todolistjules:.*|image: ${{ env.ACR_LOGIN_SERVER }}/todolistjules:${{ steps.tag.outputs.TAG }}|" "$FILE"
+          grep "image:" "$FILE"

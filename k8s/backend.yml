@@ -1,40 +1,40 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: todolist
+  name: todolistjules
 
 spec:
   replicas: 1
 
   selector:
     matchLabels:
-      app: todolist
+      app: todolistjules
 
   template:
     metadata:
       labels:
-        app: todolist
+        app: todolistjules
 
     spec:
       imagePullSecrets:
         - name: acr-pull
 
       containers:
-        - name: todolist
-          image: m324demoacrqba.azurecr.io/todolist:7e3cc3d
+        - name: todolistjules
+          image: m324demoacrqba.azurecr.io/todolistjules:latest
           ports:
             - containerPort: 3000
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: todolist-service
+  name: todolistjules-service
 
 spec:
   type: ClusterIP
 
   selector:
-    app: todolist
+    app: todolistjules
 
   ports:
     - protocol: TCP
