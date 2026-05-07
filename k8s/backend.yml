@@ -25,6 +25,7 @@ kind: Service
 metadata:
   name: todolistjules-backend-service
 spec:
+#accessible uniquement à l'intérieur du cluster Kubernetes
   type: ClusterIP
   selector:
     app: todolistjules

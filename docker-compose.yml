@@ -1,9 +1,19 @@
-version: "3.8"
+# Version du format Docker Compose
+version: "1.0"
 
 services:
+  # Déclaration du service 
   app:
+
+    # Construit l'image à partir du Dockerfile dans le dossier courant
     build: .
-    container_name: task-manager-app
+
+    # Nom du conteneur 
+    container_name: todolistjules
+
+    # Mapping des ports :
     ports:
       - "3000:3000"
+
+    # Redémarre automatiquement le conteneur s'il crash
     restart: always
