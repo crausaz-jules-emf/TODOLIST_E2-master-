@@ -10,8 +10,9 @@ env:
   IMAGE_NAME: task-manager-app
 
 jobs:
-  build-and-push:
+  build-docker:
     runs-on: ubuntu-latest
+    environment: ACR
 
     steps:
       # -------------------
@@ -45,14 +46,14 @@ jobs:
           docker build -t ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }} .
 
       # -------------------
-      # Push Docker image (versioned)
+      # Push versioned image
       # -------------------
       - name: Push Docker image (SHA)
         run: |
           docker push ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }}
 
       # -------------------
-      # Push Docker image (latest)
+      # Tag + push latest
       # -------------------
       - name: Tag and push latest
         run: |
