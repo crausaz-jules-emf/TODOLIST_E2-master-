@@ -1,69 +1,79 @@
-name: CD - Build & Push Docker Image
-
+name: CD
+ 
 on:
   push:
-    branches:
-      - main
-
+    branches: ["main"]
+ 
 env:
   ACR_LOGIN_SERVER: m324demoacrqba.azurecr.io
   IMAGE_NAME: todolistjules
-
+ 
 jobs:
-  build-docker:
+  build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     environment: ACR
-
+ 
     steps:
-      # -------------------
-      # Checkout code
-      # -------------------
-      - name: Checkout repository
+      # --------------------
+      # Récupération du code
+      # --------------------
+      - name: Check out Git repository
         uses: actions/checkout@v4
-
-      # -------------------
-      # Compute image tag
-      # -------------------
+ 
+      # --------------------
+      # Génération du tag unique
+      # --------------------
       - name: Compute image tag
         id: tag
         run: echo "TAG=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+ 
+      # --------------------
+      # Build Docker image
+      # --------------------
+      - name: Build Docker image
+        run: |
+          docker build -f Dockerfile -t ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }} .
 
-      # -------------------
+          docker tag ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }} \
+                     ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
+ 
+      # --------------------
       # Login to ACR
-      # -------------------
+      # --------------------
       - name: Login to Azure Container Registry
         uses: azure/docker-login@v2
         with:
           login-server: ${{ env.ACR_LOGIN_SERVER }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
-
-      # -------------------
-      # Build Docker image
-      # -------------------
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }} .
-
-      # -------------------
-      # Push versioned image
-      # -------------------
-      - name: Push Docker image (SHA)
+ 
+      # --------------------
+      # Push Docker image to ACR
+      # --------------------
+      - name: Push Docker image to ACR
         run: |
           docker push ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }}
-
-      # -------------------
-      # Tag + push latest
-      # -------------------
-      - name: Tag and push latest
-        run: |
-          docker tag ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }} \
-                     ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
-
           docker push ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:latest
-
-      - name: Update Backend image tag in Kubernetes manifest
+ 
+      # --------------------
+      # Update image tag in Kubernetes manifest
+      # --------------------
+      - name: Update image tag in Kubernetes manifest
         run: |
-          FILE="k8s/backend.yml"
-          sed -i "s|image: ${{ env.ACR_LOGIN_SERVER }}/todolistjules:.*|image: ${{ env.ACR_LOGIN_SERVER }}/todolistjules:${{ steps.tag.outputs.TAG }}|" "$FILE"
-          grep "image:" "$FILE"
+          sed -i "s|image: ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:.*|image: ${{ env.ACR_LOGIN_SERVER }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.TAG }}|" k8s/backend.yml
+ 
+      # --------------------
+      # Commit Kubernetes manifest
+      # --------------------
+      - name: Commit Kubernetes manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+ 
+          git add k8s/backend.yml
+ 
+          git commit -m "Update manifest image to ${{ steps.tag.outputs.TAG }}"
+ 
+          git push origin HEAD:main
