@@ -47,7 +47,7 @@ Vous devez fournir un workflow distinct pour la CI. Ce workflow doit au minimum 
 
 * se déclencher sur `push` et/ou `pull_request` ;
 * installer la bonne version de Node.js ;
-* installer les dépendances du projet ;
+* installer les dépendances du projet ;x
 * exécuter le linting avec `ESLint`.
 
 Le but de cette CI est de vérifier automatiquement la qualité statique du code.
