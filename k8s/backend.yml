@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todolist
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: todolist
+
+  template:
+    metadata:
+      labels:
+        app: todolist
+
+    spec:
+      imagePullSecrets:
+        - name: acr-pull
+
+      containers:
+        - name: todolist
+          image: m324demoacrqba.azurecr.io/todolist:7e3cc3d
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todolist-service
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: todolist
+
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
